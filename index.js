@@ -3,7 +3,6 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
 var userList = [];
-var typingUsers = {};
 
 app.get('/', function(req, res){
   res.send('<h1>AppCoda - SocketChat Server</h1>');
@@ -31,10 +30,8 @@ io.on('connection', function(clientSocket){
       }
     }
 
-    delete typingUsers[clientNickname];
     io.emit("userList", userList);
     io.emit("userExitUpdate", clientNickname);
-    io.emit("userTypingUpdate", typingUsers);
   });
 
 
@@ -52,15 +49,12 @@ io.on('connection', function(clientSocket){
   clientSocket.on('chatMessage', function(clientNickname, message){
     console.log(message)
     var currentDateTime = new Date().toLocaleString();
-    delete typingUsers[clientNickname];
-    io.emit("userTypingUpdate", typingUsers);
     io.emit('newChatMessage', clientNickname, message, currentDateTime);
   });
 
 
   clientSocket.on("connectUser", function(clientNickname) {
       var message = "User " + clientNickname + " was connected.";
-      console.log(message);
 
       var userInfo = {};
       var foundUser = false;
@@ -84,19 +78,4 @@ io.on('connection', function(clientSocket){
       io.emit("userList", userList);
       io.emit("userConnectUpdate", userInfo)
   });
-
-
-  clientSocket.on("startType", function(clientNickname){
-    console.log("User " + clientNickname + " is writing a message...");
-    typingUsers[clientNickname] = 1;
-    io.emit("userTypingUpdate", typingUsers);
-  });
-
-
-  clientSocket.on("stopType", function(clientNickname){
-    console.log("User " + clientNickname + " has stopped writing a message...");
-    delete typingUsers[clientNickname];
-    io.emit("userTypingUpdate", typingUsers);
-  });
-
 });
