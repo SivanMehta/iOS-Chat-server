@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+  </head>
+  <body>
+    <ul id="messages"></ul>
+    <input type="text" id = "nickname"></input>
+    <button onclick = "connect()">Connect</button>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      var socket = io()
+
+      function connect() {
+        socket.emit('connectUser', nickname.value);
+      }
+
+      socket.on('denyAccess', () => {
+        alert('Could not connect')
+      })
+    </script>
+  </body>
+</html>

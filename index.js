@@ -1,11 +1,12 @@
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+const path = require('path')
 
 var userList = [];
 
 app.get('/', function(req, res){
-  res.send('<h1>AppCoda - SocketChat Server</h1>');
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 const port = process.env.PORT || 3000
@@ -14,37 +15,16 @@ http.listen(port, function(){
   console.log('Listening on ' + port);
 });
 
+io.on('connection', function(clientSocket) {
 
-io.on('connection', function(clientSocket){
-  console.log('a user connected');
+  clientSocket.on('disconnect', () => {
+    console.log(clientSocket.id, "disconnected")
 
-  clientSocket.on('disconnect', function(){
-    console.log('user disconnected');
+    userList = userList.filter(user => user.id !== clientSocket.id)
 
-    var clientNickname;
-    for (var i=0; i<userList.length; i++) {
-      if (userList[i]["id"] == clientSocket.id) {
-        userList[i]["isConnected"] = false;
-        clientNickname = userList[i]["nickname"];
-        break;
-      }
-    }
-
-    io.emit("userList", userList);
-    io.emit("userExitUpdate", clientNickname);
+    console.log("Users: ", userList)
+    io.emit("userList", userList)
   });
-
-
-  clientSocket.on("exitUser", function(clientNickname){
-    for (var i=0; i<userList.length; i++) {
-      if (userList[i]["id"] == clientSocket.id) {
-        userList.splice(i, 1);
-        break;
-      }
-    }
-    io.emit("userExitUpdate", clientNickname);
-  });
-
 
   clientSocket.on('chatMessage', function(clientNickname, message){
     console.log(message)
@@ -54,28 +34,32 @@ io.on('connection', function(clientSocket){
 
 
   clientSocket.on("connectUser", function(clientNickname) {
-      var message = "User " + clientNickname + " was connected.";
-
-      var userInfo = {};
-      var foundUser = false;
-      for (var i=0; i<userList.length; i++) {
-        if (userList[i]["nickname"] == clientNickname) {
-          userList[i]["isConnected"] = true
-          userList[i]["id"] = clientSocket.id;
-          userInfo = userList[i];
-          foundUser = true;
-          break;
+      // only allow 2 users at most
+      if(userList.length < 2) {
+        var userInfo = {};
+        var foundUser = false;
+        for (var i = 0; i < userList.length; i++) {
+          if (userList[i]["nickname"] == clientNickname) {
+            userList[i]["isConnected"] = true
+            userList[i]["id"] = clientSocket.id;
+            userInfo = userList[i];
+            foundUser = true;
+            break;
+          }
         }
-      }
 
-      if (!foundUser) {
-        userInfo["id"] = clientSocket.id;
-        userInfo["nickname"] = clientNickname;
-        userInfo["isConnected"] = true
-        userList.push(userInfo);
-      }
+        if (!foundUser) {
+          userInfo["id"] = clientSocket.id;
+          userInfo["nickname"] = clientNickname;
+          userInfo["isConnected"] = true
+          userList.push(userInfo);
+        }
 
-      io.emit("userList", userList);
-      io.emit("userConnectUpdate", userInfo)
+        console.log("Users: ", userList)
+        io.emit("userList", userList)
+        io.emit("userConnectUpdate", userInfo)
+    } else {
+      io.to(clientSocket.id).emit('denyAccess')
+    }
   });
 });
