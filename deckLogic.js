@@ -12,9 +12,9 @@ function getCards = (callback) => {
 
 exports.getStartingHands = (callback) => {
   getCards((hands) => {
-    callback({
-      p0: hands.slice(0, 26),
-      p1: hands.slice(26, 52)
-    })
+    callback([
+      hands.slice(0, 26),
+      hands.slice(26, 52)
+    ])
   })
 }

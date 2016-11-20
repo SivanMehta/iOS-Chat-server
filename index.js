@@ -64,10 +64,10 @@ io.on('connection', function(clientSocket) {
     }
   });
 
-  clientSocket.on("startGame", () => {
+  clientSocket.on("startedGame", () => {
     deckLogic.getStartingHands((hands) => {
-      io.emit('startedGame', {
-        hands: hands
+      [0, 1].forEach(i => {
+        io.to(userList[i].id).emit('startedGame', hands[i])
       })
     })
   })
