@@ -18,6 +18,10 @@
       socket.on('denyAccess', () => {
         alert('Could not connect')
       })
+
+      socket.on("userList", (data) => {
+        console.log(data)
+      })
     </script>
   </body>
 </html>

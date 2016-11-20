@@ -65,6 +65,7 @@ io.on('connection', function(clientSocket) {
   });
 
   clientSocket.on("startedGame", () => {
+    console.log("Started game between " + userList.map(user => user.nickname))
     deckLogic.getStartingHands((hands) => {
       [0, 1].forEach(i => {
         io.to(userList[i].id).emit('startedGame', hands[i])
