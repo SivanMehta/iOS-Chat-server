@@ -1,6 +1,7 @@
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var deckLogic = require('./deckLogic')
 const path = require('path')
 
 var userList = [];
@@ -62,4 +63,12 @@ io.on('connection', function(clientSocket) {
       io.to(clientSocket.id).emit('denyAccess')
     }
   });
+
+  clientSocket.on("startGame", () => {
+    deckLogic.getStartingHands((hands) => {
+      io.emit('startedGame', {
+        hands: hands
+      })
+    })
+  })
 });
