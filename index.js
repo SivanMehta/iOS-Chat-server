@@ -72,10 +72,12 @@ io.on('connection', function(clientSocket) {
         [0, 1].forEach(i => {
           io.to(userList[i].id).emit('startedGame', hands[i])
           currentHands[userList[i].id] = hands[i]
+          console.log("persisting hand for ", userList[i].id)
         })
       })
     } else { // someone is joining the game
-      io.to(clientSocket.id).emit('join game', hands[i])
+      console.log("fetching hand for ", clientSocket.id)
+      io.to(clientSocket.id).emit('join game', currentHands[clientSocket.id])
     }
   })
 });
