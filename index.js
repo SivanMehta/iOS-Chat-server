@@ -4,7 +4,8 @@ var io = require('socket.io')(http);
 var deckLogic = require('./deckLogic')
 const path = require('path')
 
-var userList = [];
+var userList = []
+var currentHands = {}
 
 app.get('/', function(req, res){
   res.sendFile(path.join(__dirname, 'index.html'));
@@ -65,11 +66,16 @@ io.on('connection', function(clientSocket) {
   });
 
   clientSocket.on("startedGame", () => {
-    console.log("Started game between " + userList.map(user => user.nickname))
-    deckLogic.getStartingHands((hands) => {
-      [0, 1].forEach(i => {
-        io.to(userList[i].id).emit('startedGame', hands[i])
+    if(Object.keys(currentHands).length == 0) { // there is no game in progress
+      console.log("Started game between " + userList.map(user => user.nickname))
+      deckLogic.getStartingHands((hands) => {
+        [0, 1].forEach(i => {
+          io.to(userList[i].id).emit('startedGame', hands[i])
+          currentHands[userList[i].id] = hands[i]
+        })
       })
-    })
+    } else { // someone is joining the game
+      io.to(clientSocket.id).emit('join game', hands[i])
+    }
   })
 });
