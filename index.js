@@ -23,6 +23,7 @@ io.on('connection', function(clientSocket) {
     console.log(clientSocket.id, "disconnected")
 
     userList = userList.filter(user => user.id !== clientSocket.id)
+    currentHands = {}
 
     console.log("Users: ", userList)
     io.emit("userList", userList)
