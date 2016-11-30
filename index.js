@@ -29,10 +29,12 @@ io.on('connection', function(clientSocket) {
     io.emit("userList", userList)
   });
 
-  clientSocket.on('chatMessage', function(clientNickname, message){
-    console.log(message)
-    var currentDateTime = new Date().toLocaleString();
-    io.emit('newChatMessage', clientNickname, message, currentDateTime);
+  clientSocket.on('made battle move', () => {
+    io.emit('made battle move')
+  })
+
+  clientSocket.on('made war move', () => {
+    io.emit('made war move')
   });
 
 
