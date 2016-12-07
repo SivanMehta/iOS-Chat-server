@@ -27,6 +27,7 @@ io.on('connection', function(clientSocket) {
 
     console.log("Users: ", userList)
     io.emit("userList", userList)
+    io.emit("end games")
   });
 
   clientSocket.on('made battle move', () => {
